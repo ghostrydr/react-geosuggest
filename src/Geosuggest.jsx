@@ -9,6 +9,7 @@ import propTypes from './prop-types';
 import filterInputAttributes from './filter-input-attributes';
 
 import Input from './input';
+import GhostedInput from './ghosted-input';
 import SuggestList from './suggest-list';
 
 // Escapes special characters in user input for regex
@@ -30,12 +31,13 @@ class Geosuggest extends React.Component {
       isSuggestsHidden: true,
       isLoading: false,
       userInput: props.initialValue,
-      activeSuggest: null,
+      activeSuggest: props.activeSuggest,
       suggests: []
     };
 
     this.onInputChange = this.onInputChange.bind(this);
     this.onAfterInputChange = this.onAfterInputChange.bind(this);
+    this.activateSuggestDefault = {label: ''};
 
     if (props.queryDelay) {
       this.onAfterInputChange =
@@ -264,7 +266,7 @@ class Geosuggest extends React.Component {
         activeSuggest.isFixture === listedSuggest.isFixture
       );
 
-      activeSuggest = newSuggest || null;
+      activeSuggest = newSuggest || this.state.activeSuggest;
     }
 
     return activeSuggest;
@@ -286,7 +288,7 @@ class Geosuggest extends React.Component {
     this.timer = setTimeout(() => {
       this.setState({
         isSuggestsHidden: true,
-        activeSuggest: null
+        activeSuggest: this.state.activeSuggest
       });
     }, 100);
   }
@@ -300,10 +302,9 @@ class Geosuggest extends React.Component {
       this.showSuggests();
       return;
     }
-
     const suggestsCount = this.state.suggests.length - 1,
       next = direction === 'next';
-    let newActiveSuggest = null,
+    let newActiveSuggest = this.activateSuggestDefault,
       newIndex = 0,
       i = 0;
 
@@ -400,7 +401,12 @@ class Geosuggest extends React.Component {
         onNext={this.onNext}
         onPrev={this.onPrev}
         onSelect={this.onSelect}
-        onEscape={this.hideSuggests} {...attributes} />,
+        onEscape={this.hideSuggests}
+        ghostedInput={this.props.ghostedInput}
+        {...attributes} />,
+      ghostedInput = <GhostedInput
+        activeSuggest={this.state.activeSuggest}
+        userInput={this.state.userInput} />,
       suggestionsList = <SuggestList isHidden={this.state.isSuggestsHidden}
         style={this.props.style.suggests}
         suggestItemStyle={this.props.style.suggestItem}
@@ -421,6 +427,7 @@ class Geosuggest extends React.Component {
           <label className="geosuggest__label"
                  htmlFor={attributes.id}>{this.props.label}</label>
         }
+        {this.props.ghostedInput && ghostedInput}
         {input}
       </div>
       <div className="geosuggest__suggests-wrapper">

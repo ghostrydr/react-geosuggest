@@ -155,6 +155,12 @@ Default: `250`
 Sets the delay in milliseconds after typing before a request will be sent to find suggestions.
 Specify `0` if you wish to fetch suggestions after every keystroke.
 
+#### ghostedInput
+Type: `Boolean`
+Default: `true`
+
+Creates ghosted input that matches the highlighted suggestion (a-la Google)
+
 #### onFocus
 Type: `Function`
 Default: `function() {}`
