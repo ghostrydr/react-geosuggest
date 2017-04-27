@@ -512,7 +512,7 @@ var Geosuggest = function (_React$Component) {
         onEscape: this.hideSuggests,
         ghostedInput: this.props.ghostedInput
       }, attributes)),
-          ghostedInput = _react2.default.createElement(_ghostedInput2.default, {
+          ghostedInput = _react2.default.createElement(_ghostedInput2.default, { className: this.props.inputClassName,
         activeSuggest: this.state.activeSuggest,
         userInput: this.state.userInput }),
           suggestionsList = _react2.default.createElement(_suggestList2.default, { isHidden: this.state.isSuggestsHidden,
