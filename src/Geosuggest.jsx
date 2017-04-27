@@ -405,7 +405,7 @@ class Geosuggest extends React.Component {
         onEscape={this.hideSuggests}
         ghostedInput={this.props.ghostedInput}
         {...attributes} />,
-      ghostedInput = <GhostedInput
+      ghostedInput = <GhostedInput className={this.props.inputClassName}
         activeSuggest={this.state.activeSuggest}
         userInput={this.state.userInput} />,
       suggestionsList = <SuggestList isHidden={this.state.isSuggestsHidden}
