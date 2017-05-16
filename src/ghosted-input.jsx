@@ -30,6 +30,28 @@ class GhostedInput extends React.Component {
   }
 
   /**
+   * Only display text if user input matches selected item
+   * @return {Bool}
+   */
+  inputMatchesSelectedSuggest() {
+    return new RegExp(this.props.userInput, 'i').test(this.props.activeSuggest.label);  // eslint-disable-line max-len
+  }
+
+  /**
+   * Determin ghosted input value
+   * @return {String}
+   */
+  getGhostedValue() {
+    // Selected input matches user input
+    if (this.inputMatchesSelectedSuggest()) {
+      return this.matchUserInputCasing();
+    }
+
+    return '';
+  }
+
+
+  /**
    * Render the view
    * @return {Function} The React element to render
    */
@@ -45,7 +67,7 @@ class GhostedInput extends React.Component {
       type='text'
       autoComplete='off'
       {...attributes}
-      value={this.matchUserInputCasing()}
+      value={this.getGhostedValue()}
       style={this.props.style} />;
   }
 }
