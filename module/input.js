@@ -84,6 +84,7 @@ var Input = function (_React$Component) {
         case 9:
           // TAB
           if (!_this.props.ignoreTab) {
+            _this.props.onTab();
             _this.props.onSelect();
           }
           break;
@@ -180,6 +181,7 @@ var Input = function (_React$Component) {
         onChange: this.onChange,
         onKeyPress: this.onKeyPress,
         onFocus: this.onFocus,
+        placeholder: this.props.placeholder,
         onBlur: this.onBlur }));
     }
   }]);

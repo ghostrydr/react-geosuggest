@@ -74,7 +74,11 @@ var Geosuggest = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Geosuggest.__proto__ || Object.getPrototypeOf(Geosuggest)).call(this, props));
 
     _this.onInputChange = function (userInput) {
-      _this.setState({ userInput: userInput }, _this.onAfterInputChange);
+      _this.setState({
+        userInput: userInput,
+        placeholder: userInput === '' ? _this.props.placeholder : '',
+        ghostedInput: _this.state.activeSuggest ? _this.state.activeSuggest.label : '' // eslint-disable-line max-len
+      }, _this.onAfterInputChange);
     };
 
     _this.onAfterInputChange = function () {
@@ -89,9 +93,18 @@ var Geosuggest = function (_React$Component) {
       _this.showSuggests();
     };
 
+    _this.onTab = function () {
+      _this.props.onTab();
+    };
+
     _this.onInputBlur = function () {
       if (!_this.state.ignoreBlur) {
         _this.hideSuggests();
+      }
+
+      // clear ghosted input
+      if (_this.state.userInput !== '') {
+        _this.setState({ ghostedInput: '' });
       }
     };
 
@@ -124,7 +137,8 @@ var Geosuggest = function (_React$Component) {
       _this.timer = setTimeout(function () {
         _this.setState({
           isSuggestsHidden: true,
-          activeSuggest: _this.state.activeSuggest
+          activeSuggest: _this.state.activeSuggest,
+          placeholder: _this.state.userInput === '' ? _this.props.placeholder : '' // eslint-disable-line max-len
         });
       }, 100);
     };
@@ -155,7 +169,9 @@ var Geosuggest = function (_React$Component) {
       isLoading: false,
       userInput: props.initialValue,
       activeSuggest: props.activeSuggest,
-      suggests: []
+      suggests: [],
+      placeholder: props.placeholder,
+      ghostedInput: ''
     };
 
     _this.onInputChange = _this.onInputChange.bind(_this);
@@ -233,6 +249,11 @@ var Geosuggest = function (_React$Component) {
 
     /**
      * When the input gets focused
+     */
+
+
+    /**
+     * When the user hits tab
      */
 
 
@@ -451,7 +472,16 @@ var Geosuggest = function (_React$Component) {
 
       this.props.onActivateSuggest(newActiveSuggest);
 
-      this.setState({ activeSuggest: newActiveSuggest });
+      this.setState({
+        activeSuggest: newActiveSuggest,
+        ghostedInput: newActiveSuggest.label
+      });
+
+      if (newActiveSuggest.label !== '') {
+        this.setState({ placeholder: '' });
+      } else {
+        this.setState({ placeholder: this.props.placeholder });
+      }
     }
 
     /**
@@ -496,9 +526,11 @@ var Geosuggest = function (_React$Component) {
       var attributes = (0, _filterInputAttributes2.default)(this.props),
           classes = (0, _classnames2.default)('geosuggest', this.props.className, { 'geosuggest--loading': this.state.isLoading }),
           shouldRenderLabel = this.props.label && attributes.id,
-          input = _react2.default.createElement(_input2.default, _extends({ className: this.props.inputClassName,
+          input = _react2.default.createElement(_input2.default, _extends({ className: this.props.inputClassName
+      }, attributes, {
         ref: 'input',
         value: this.state.userInput,
+        placeholder: this.state.placeholder,
         ignoreEnter: !this.state.isSuggestsHidden,
         ignoreTab: this.props.ignoreTab,
         style: this.props.style.input,
@@ -510,11 +542,11 @@ var Geosuggest = function (_React$Component) {
         onPrev: this.onPrev,
         onSelect: this.onSelect,
         onEscape: this.hideSuggests,
-        ghostedInput: this.props.ghostedInput
-      }, attributes)),
+        onTab: this.onTab,
+        ghostedInput: this.props.ghostedInput })),
           ghostedInput = _react2.default.createElement(_ghostedInput2.default, { className: this.props.inputClassName,
-        activeSuggest: this.state.activeSuggest,
-        userInput: this.state.userInput }),
+        userInput: this.state.userInput,
+        value: this.state.ghostedInput }),
           suggestionsList = _react2.default.createElement(_suggestList2.default, { isHidden: this.state.isSuggestsHidden,
         style: this.props.style.suggests,
         suggestItemStyle: this.props.style.suggestItem,

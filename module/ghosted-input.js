@@ -69,7 +69,40 @@ var GhostedInput = function (_React$Component) {
   }, {
     key: 'matchUserInputCasing',
     value: function matchUserInputCasing() {
-      return this.props.activeSuggest.label.replace(new RegExp(this.props.userInput, 'i'), this.props.userInput); // eslint-disable-line max-len
+      return this.props.value.replace(new RegExp(this.props.userInput, 'i'), this.props.userInput); // eslint-disable-line max-len
+    }
+
+    /**
+     * Only display text if user input matches selected item
+     * @return {Bool}
+     */
+
+  }, {
+    key: 'inputMatchesSelectedSuggest',
+    value: function inputMatchesSelectedSuggest() {
+      return new RegExp(this.props.userInput, 'i').test(this.props.value); // eslint-disable-line max-len
+    }
+
+    /**
+     * Determin ghosted input value
+     * @return {String}
+     */
+
+  }, {
+    key: 'getGhostedValue',
+    value: function getGhostedValue() {
+
+      // Clear ghosted value if user clears field
+      if (!this.props.userInput) {
+        return '';
+      }
+
+      // Selected input matches user input
+      if (this.inputMatchesSelectedSuggest()) {
+        return this.matchUserInputCasing();
+      }
+
+      return '';
     }
 
     /**
@@ -88,7 +121,7 @@ var GhostedInput = function (_React$Component) {
         type: 'text',
         autoComplete: 'off'
       }, attributes, {
-        value: this.matchUserInputCasing(),
+        value: this.getGhostedValue(),
         style: this.props.style }));
     }
   }]);
@@ -104,7 +137,7 @@ var GhostedInput = function (_React$Component) {
 
 GhostedInput.defaultProps = {
   className: '',
-  activeSuggest: { label: '' },
+  value: '',
   userInput: ''
 };
 

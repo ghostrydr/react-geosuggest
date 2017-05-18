@@ -39,5 +39,6 @@ exports.default = {
     'suggestItem': {}
   },
   ignoreTab: false,
+  onTab: function onTab() {},
   ghostedInput: false
 };

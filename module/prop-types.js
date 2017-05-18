@@ -38,6 +38,7 @@ exports.default = {
   onBlur: _react2.default.PropTypes.func,
   onChange: _react2.default.PropTypes.func,
   onKeyPress: _react2.default.PropTypes.func,
+  onTab: _react2.default.PropTypes.func,
   skipSuggest: _react2.default.PropTypes.func,
   getSuggestLabel: _react2.default.PropTypes.func,
   autoActivateFirstSuggest: _react2.default.PropTypes.bool,
