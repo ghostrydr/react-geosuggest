@@ -1,3 +1,24 @@
+## 2.2.0 (2017-05-18)
+
+
+#### Bug Fixes
+
+* Do not use setState to save timer instance. ([3709fdb6](https://github.com/ubilabs/react-geosuggest/commit/3709fdb6f8d7d8e7133c153398be87268b445a7a))
+* **ghosted input:**
+  * refactoring for better ghosting/placeholdering ([cc4bf7a2](https://github.com/ubilabs/react-geosuggest/commit/cc4bf7a203f244906500d67a04da95a2be492877))
+  * clear and reset placeholder ([84c971b3](https://github.com/ubilabs/react-geosuggest/commit/84c971b3a01bb65b90e095aa01b669f917e3ac77))
+  * fixes issue where ghosted input didn't clear ([fc7b7ba5](https://github.com/ubilabs/react-geosuggest/commit/fc7b7ba58d242d55a95e8883610650828e8ab965))
+
+
+#### Features
+
+* add blur() ([d16c6105](https://github.com/ubilabs/react-geosuggest/commit/d16c6105557bcca8dabc160927a448d86f06ffbe))
+* **ghosted input:**
+  * adds passed classed to ghosted input ([a51d952f](https://github.com/ubilabs/react-geosuggest/commit/a51d952f060aa60140ce1c93d153c53772aabebc))
+  * Adds ghosted input ([bcc71ca3](https://github.com/ubilabs/react-geosuggest/commit/bcc71ca32a87893981b14f2509aecb2404599f4e))
+* **onTab:** adds onTab callback ([ac60bf5c](https://github.com/ubilabs/react-geosuggest/commit/ac60bf5cc037b47e955cd0ce75dd98828a1d5705))
+
+
 ## 2.1.0 (2017-01-11)
 
 

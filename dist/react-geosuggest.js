@@ -561,6 +561,10 @@ var _input = require('./input');
 
 var _input2 = _interopRequireDefault(_input);
 
+var _ghostedInput = require('./ghosted-input');
+
+var _ghostedInput2 = _interopRequireDefault(_ghostedInput);
+
 var _suggestList = require('./suggest-list');
 
 var _suggestList2 = _interopRequireDefault(_suggestList);
@@ -595,7 +599,11 @@ var Geosuggest = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Geosuggest.__proto__ || Object.getPrototypeOf(Geosuggest)).call(this, props));
 
     _this.onInputChange = function (userInput) {
-      _this.setState({ userInput: userInput }, _this.onAfterInputChange);
+      _this.setState({
+        userInput: userInput,
+        placeholder: userInput === '' ? _this.props.placeholder : '',
+        ghostedInput: _this.state.activeSuggest ? _this.state.activeSuggest.label : '' // eslint-disable-line max-len
+      }, _this.onAfterInputChange);
     };
 
     _this.onAfterInputChange = function () {
@@ -610,9 +618,18 @@ var Geosuggest = function (_React$Component) {
       _this.showSuggests();
     };
 
+    _this.onTab = function () {
+      _this.props.onTab();
+    };
+
     _this.onInputBlur = function () {
       if (!_this.state.ignoreBlur) {
         _this.hideSuggests();
+      }
+
+      // clear ghosted input
+      if (_this.state.userInput !== '') {
+        _this.setState({ ghostedInput: '' });
       }
     };
 
@@ -645,7 +662,8 @@ var Geosuggest = function (_React$Component) {
       _this.timer = setTimeout(function () {
         _this.setState({
           isSuggestsHidden: true,
-          activeSuggest: null
+          activeSuggest: _this.state.activeSuggest,
+          placeholder: _this.state.userInput === '' ? _this.props.placeholder : '' // eslint-disable-line max-len
         });
       }, 100);
     };
@@ -675,12 +693,15 @@ var Geosuggest = function (_React$Component) {
       isSuggestsHidden: true,
       isLoading: false,
       userInput: props.initialValue,
-      activeSuggest: null,
-      suggests: []
+      activeSuggest: props.activeSuggest,
+      suggests: [],
+      placeholder: props.placeholder,
+      ghostedInput: ''
     };
 
     _this.onInputChange = _this.onInputChange.bind(_this);
     _this.onAfterInputChange = _this.onAfterInputChange.bind(_this);
+    _this.activateSuggestDefault = { label: '' };
 
     if (props.queryDelay) {
       _this.onAfterInputChange = (0, _lodash2.default)(_this.onAfterInputChange, props.queryDelay);
@@ -753,6 +774,11 @@ var Geosuggest = function (_React$Component) {
 
     /**
      * When the input gets focused
+     */
+
+
+    /**
+     * When the user hits tab
      */
 
 
@@ -886,7 +912,8 @@ var Geosuggest = function (_React$Component) {
           suggests.push({
             label: _this3.props.getSuggestLabel(suggest),
             placeId: suggest.place_id,
-            isFixture: false
+            isFixture: false,
+            matchedSubstrings: suggest.matched_substrings[0]
           });
         }
       });
@@ -913,7 +940,7 @@ var Geosuggest = function (_React$Component) {
           return activeSuggest.placeId === listedSuggest.placeId && activeSuggest.isFixture === listedSuggest.isFixture;
         });
 
-        activeSuggest = newSuggest || null;
+        activeSuggest = newSuggest || this.state.activeSuggest;
       }
 
       return activeSuggest;
@@ -948,10 +975,9 @@ var Geosuggest = function (_React$Component) {
         this.showSuggests();
         return;
       }
-
       var suggestsCount = this.state.suggests.length - 1,
           next = direction === 'next';
-      var newActiveSuggest = null,
+      var newActiveSuggest = this.activateSuggestDefault,
           newIndex = 0,
           i = 0;
 
@@ -971,7 +997,16 @@ var Geosuggest = function (_React$Component) {
 
       this.props.onActivateSuggest(newActiveSuggest);
 
-      this.setState({ activeSuggest: newActiveSuggest });
+      this.setState({
+        activeSuggest: newActiveSuggest,
+        ghostedInput: newActiveSuggest.label
+      });
+
+      if (newActiveSuggest.label !== '') {
+        this.setState({ placeholder: '' });
+      } else {
+        this.setState({ placeholder: this.props.placeholder });
+      }
     }
 
     /**
@@ -1016,9 +1051,11 @@ var Geosuggest = function (_React$Component) {
       var attributes = (0, _filterInputAttributes2.default)(this.props),
           classes = (0, _classnames2.default)('geosuggest', this.props.className, { 'geosuggest--loading': this.state.isLoading }),
           shouldRenderLabel = this.props.label && attributes.id,
-          input = _react2.default.createElement(_input2.default, _extends({ className: this.props.inputClassName,
+          input = _react2.default.createElement(_input2.default, _extends({ className: this.props.inputClassName
+      }, attributes, {
         ref: 'input',
         value: this.state.userInput,
+        placeholder: this.state.placeholder,
         ignoreEnter: !this.state.isSuggestsHidden,
         ignoreTab: this.props.ignoreTab,
         style: this.props.style.input,
@@ -1029,10 +1066,17 @@ var Geosuggest = function (_React$Component) {
         onNext: this.onNext,
         onPrev: this.onPrev,
         onSelect: this.onSelect,
-        onEscape: this.hideSuggests }, attributes)),
+        onEscape: this.hideSuggests,
+        onTab: this.onTab,
+        ghostedInput: this.props.ghostedInput })),
+          ghostedInput = _react2.default.createElement(_ghostedInput2.default, { className: this.props.inputClassName,
+        userInput: this.state.userInput,
+        value: this.state.ghostedInput }),
           suggestionsList = _react2.default.createElement(_suggestList2.default, { isHidden: this.state.isSuggestsHidden,
         style: this.props.style.suggests,
         suggestItemStyle: this.props.style.suggestItem,
+        userInput: this.state.userInput,
+        isHighlightMatch: this.props.highlightMatch,
         suggestsClassName: this.props.suggestsClassName,
         suggestItemClassName: this.props.suggestItemClassName,
         suggests: this.state.suggests,
@@ -1056,6 +1100,7 @@ var Geosuggest = function (_React$Component) {
               htmlFor: attributes.id },
             this.props.label
           ),
+          this.props.ghostedInput && ghostedInput,
           input
         ),
         _react2.default.createElement(
@@ -1086,7 +1131,7 @@ Geosuggest.defaultProps = _defaults2.default;
 
 exports.default = Geosuggest;
 
-},{"./defaults":6,"./filter-input-attributes":7,"./input":8,"./prop-types":9,"./suggest-list":11,"classnames":1,"lodash.debounce":3}],6:[function(require,module,exports){
+},{"./defaults":6,"./filter-input-attributes":7,"./ghosted-input":8,"./input":9,"./prop-types":10,"./suggest-list":12,"classnames":1,"lodash.debounce":3}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1110,6 +1155,7 @@ exports.default = {
   types: null,
   queryDelay: 250,
   googleMaps: null,
+  highlightMatch: true,
   onActivateSuggest: function onActivateSuggest() {},
   onSuggestSelect: function onSuggestSelect() {},
   onSuggestNoResults: function onSuggestNoResults() {},
@@ -1126,7 +1172,9 @@ exports.default = {
     'suggests': {},
     'suggestItem': {}
   },
-  ignoreTab: false
+  ignoreTab: false,
+  onTab: function onTab() {},
+  ghostedInput: false
 };
 
 },{}],7:[function(require,module,exports){
@@ -1160,6 +1208,152 @@ var allowedAttributes = ['autoFocus', 'disabled', 'form', 'formAction', 'formEnc
  */
 
 },{}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = (window.React);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _shallowCompare = require('react/lib/shallowCompare');
+
+var _shallowCompare2 = _interopRequireDefault(_shallowCompare);
+
+var _classnames = require('classnames');
+
+var _classnames2 = _interopRequireDefault(_classnames);
+
+var _filterInputAttributes = require('./filter-input-attributes');
+
+var _filterInputAttributes2 = _interopRequireDefault(_filterInputAttributes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // eslint-disable-line no-unused-vars
+
+
+/**
+ * The input field
+ * @param {Object} props The component's props
+ * @return {JSX} The icon component.
+ */
+var GhostedInput = function (_React$Component) {
+  _inherits(GhostedInput, _React$Component);
+
+  function GhostedInput() {
+    _classCallCheck(this, GhostedInput);
+
+    return _possibleConstructorReturn(this, (GhostedInput.__proto__ || Object.getPrototypeOf(GhostedInput)).apply(this, arguments));
+  }
+
+  _createClass(GhostedInput, [{
+    key: 'shouldComponentUpdate',
+
+
+    /**
+     * Whether or not the component should update
+     * @param {Object} nextProps The new properties
+     * @param {Object} nextState The new state
+     * @return {Boolean} Update or not?
+     */
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      return (0, _shallowCompare2.default)(this, nextProps, nextState);
+    }
+
+    /**
+     * Make the ghosted text's casing match the user input
+     * @return {String} The modified string
+     */
+
+  }, {
+    key: 'matchUserInputCasing',
+    value: function matchUserInputCasing() {
+      return this.props.value.replace(new RegExp(this.props.userInput, 'i'), this.props.userInput); // eslint-disable-line max-len
+    }
+
+    /**
+     * Only display text if user input matches selected item
+     * @return {Bool}
+     */
+
+  }, {
+    key: 'inputMatchesSelectedSuggest',
+    value: function inputMatchesSelectedSuggest() {
+      return new RegExp(this.props.userInput, 'i').test(this.props.value); // eslint-disable-line max-len
+    }
+
+    /**
+     * Determin ghosted input value
+     * @return {String}
+     */
+
+  }, {
+    key: 'getGhostedValue',
+    value: function getGhostedValue() {
+
+      // Clear ghosted value if user clears field
+      if (!this.props.userInput) {
+        return '';
+      }
+
+      // Selected input matches user input
+      if (this.inputMatchesSelectedSuggest()) {
+        return this.matchUserInputCasing();
+      }
+
+      return '';
+    }
+
+    /**
+     * Render the view
+     * @return {Function} The React element to render
+     */
+
+  }, {
+    key: 'render',
+    value: function render() {
+      var attributes = (0, _filterInputAttributes2.default)(this.props),
+          classes = (0, _classnames2.default)('geosuggest__ghosted-input', this.props.className);
+
+      return _react2.default.createElement('input', _extends({ className: classes,
+        ref: 'input',
+        type: 'text',
+        autoComplete: 'off'
+      }, attributes, {
+        value: this.getGhostedValue(),
+        style: this.props.style }));
+    }
+  }]);
+
+  return GhostedInput;
+}(_react2.default.Component);
+
+/**
+ * Default values for the properties
+ * @type {Object}
+ */
+
+
+GhostedInput.defaultProps = {
+  className: '',
+  value: '',
+  userInput: ''
+};
+
+exports.default = GhostedInput;
+
+},{"./filter-input-attributes":7,"classnames":1,"react/lib/shallowCompare":4}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1246,6 +1440,7 @@ var Input = function (_React$Component) {
         case 9:
           // TAB
           if (!_this.props.ignoreTab) {
+            _this.props.onTab();
             _this.props.onSelect();
           }
           break;
@@ -1329,7 +1524,7 @@ var Input = function (_React$Component) {
     key: 'render',
     value: function render() {
       var attributes = (0, _filterInputAttributes2.default)(this.props),
-          classes = (0, _classnames2.default)('geosuggest__input', this.props.className);
+          classes = (0, _classnames2.default)('geosuggest__input', this.props.className, { 'geosuggest__input--ghosted': this.props.ghostedInput });
 
       return _react2.default.createElement('input', _extends({ className: classes,
         ref: 'input',
@@ -1342,6 +1537,7 @@ var Input = function (_React$Component) {
         onChange: this.onChange,
         onKeyPress: this.onKeyPress,
         onFocus: this.onFocus,
+        placeholder: this.props.placeholder,
         onBlur: this.onBlur }));
     }
   }]);
@@ -1365,7 +1561,7 @@ Input.defaultProps = {
 
 exports.default = Input;
 
-},{"./filter-input-attributes":7,"classnames":1,"react/lib/shallowCompare":4}],9:[function(require,module,exports){
+},{"./filter-input-attributes":7,"classnames":1,"react/lib/shallowCompare":4}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1399,11 +1595,14 @@ exports.default = {
   types: _react2.default.PropTypes.array,
   queryDelay: _react2.default.PropTypes.number,
   googleMaps: _react2.default.PropTypes.object,
+  highlightMatch: _react2.default.PropTypes.bool,
+  ghostedInput: _react2.default.PropTypes.bool,
   onSuggestSelect: _react2.default.PropTypes.func,
   onFocus: _react2.default.PropTypes.func,
   onBlur: _react2.default.PropTypes.func,
   onChange: _react2.default.PropTypes.func,
   onKeyPress: _react2.default.PropTypes.func,
+  onTab: _react2.default.PropTypes.func,
   skipSuggest: _react2.default.PropTypes.func,
   getSuggestLabel: _react2.default.PropTypes.func,
   autoActivateFirstSuggest: _react2.default.PropTypes.bool,
@@ -1416,7 +1615,7 @@ exports.default = {
   label: _react2.default.PropTypes.string
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1486,6 +1685,48 @@ var SuggestItem = function (_React$Component) {
     }
 
     /**
+     * Makes a text bold
+     * @param {String} el element
+     * @return {JSX} Bolder text
+     */
+
+  }, {
+    key: 'makeBold',
+    value: function makeBold(el) {
+      return _react2.default.createElement(
+        'b',
+        { className: 'matched-text' },
+        el
+      );
+    }
+
+    /**
+     * Replace matched text with the same bold
+     * @param {Object} userInput Value from input
+     * @param {Object} suggest Data from google
+     * @return {String} Formatted string with highlighted matched text
+     */
+
+  }, {
+    key: 'formatMatchedText',
+    value: function formatMatchedText(userInput, suggest) {
+      if (!userInput || !suggest.matchedSubstrings) {
+        return suggest.label;
+      }
+
+      var start = suggest.matchedSubstrings.offset,
+          end = suggest.matchedSubstrings.length,
+          split = suggest.label.split('');
+      split.splice(start, end, this.makeBold(suggest.label.substring(start, end)));
+
+      return _react2.default.createElement(
+        'span',
+        null,
+        split
+      );
+    }
+
+    /**
      * When the suggest item got clicked
      * @param {Event} event The click event
      */
@@ -1508,7 +1749,7 @@ var SuggestItem = function (_React$Component) {
           onMouseDown: this.props.onMouseDown,
           onMouseOut: this.props.onMouseOut,
           onClick: this.onClick },
-        this.props.suggest.label
+        this.props.isHighlightMatch ? this.formatMatchedText(this.props.userInput, this.props.suggest) : this.props.suggest.label
       );
     }
   }]);
@@ -1529,7 +1770,7 @@ SuggestItem.defaultProps = {
   suggest: {}
 };
 
-},{"classnames":1,"react/lib/shallowCompare":4}],11:[function(require,module,exports){
+},{"classnames":1,"react/lib/shallowCompare":4}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1638,6 +1879,8 @@ var SuggestList = function (_React$Component) {
 
           return _react2.default.createElement(_suggestItem2.default, { key: suggest.placeId,
             className: suggest.className,
+            userInput: _this2.props.userInput,
+            isHighlightMatch: _this2.props.isHighlightMatch,
             suggest: suggest,
             style: _this2.props.suggestItemStyle,
             suggestItemClassName: _this2.props.suggestItemClassName,
@@ -1666,5 +1909,5 @@ SuggestList.defaultProps = {
   suggests: []
 };
 
-},{"./suggest-item":10,"classnames":1,"react/lib/shallowCompare":4}]},{},[5])(5)
+},{"./suggest-item":11,"classnames":1,"react/lib/shallowCompare":4}]},{},[5])(5)
 });
