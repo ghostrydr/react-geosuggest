@@ -39,6 +39,7 @@ class Geosuggest extends React.Component {
 
     this.onInputChange = this.onInputChange.bind(this);
     this.onAfterInputChange = this.onAfterInputChange.bind(this);
+    this.onTab = this.onTab.bind(this);
     this.activateSuggestDefault = {label: ''};
 
     if (props.queryDelay) {
