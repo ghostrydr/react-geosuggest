@@ -26,7 +26,7 @@ class GhostedInput extends React.Component {
    * @return {String} The modified string
    */
   matchUserInputCasing() {
-    return this.props.activeSuggest.label.replace(new RegExp(this.props.userInput, 'i'), this.props.userInput); // eslint-disable-line max-len
+    return this.props.value.replace(new RegExp(this.props.userInput, 'i'), this.props.userInput); // eslint-disable-line max-len
   }
 
   /**
@@ -34,7 +34,7 @@ class GhostedInput extends React.Component {
    * @return {Bool}
    */
   inputMatchesSelectedSuggest() {
-    return new RegExp(this.props.userInput, 'i').test(this.props.activeSuggest.label);  // eslint-disable-line max-len
+    return new RegExp(this.props.userInput, 'i').test(this.props.value);  // eslint-disable-line max-len
   }
 
   /**
@@ -42,6 +42,12 @@ class GhostedInput extends React.Component {
    * @return {String}
    */
   getGhostedValue() {
+
+    // Clear ghosted value if user clears field
+    if (!this.props.userInput) {
+      return '';
+    }
+
     // Selected input matches user input
     if (this.inputMatchesSelectedSuggest()) {
       return this.matchUserInputCasing();
@@ -78,7 +84,7 @@ class GhostedInput extends React.Component {
  */
 GhostedInput.defaultProps = {
   className: '',
-  activeSuggest: {label: ''},
+  value: '',
   userInput: ''
 };
 

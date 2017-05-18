@@ -33,7 +33,8 @@ class Geosuggest extends React.Component {
       userInput: props.initialValue,
       activeSuggest: props.activeSuggest,
       suggests: [],
-      placeholder: props.placeholder
+      placeholder: props.placeholder,
+      ghostedInput: ''
     };
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -95,7 +96,11 @@ class Geosuggest extends React.Component {
    * @param {String} userInput The input value of the user
    */
   onInputChange = userInput => {
-    this.setState({userInput}, this.onAfterInputChange);
+    this.setState({
+      userInput,
+      placeholder: userInput === '' ? this.props.placeholder : '',
+      ghostedInput: this.state.activeSuggest ? this.state.activeSuggest.label : '' // eslint-disable-line max-len
+    }, this.onAfterInputChange);
   }
 
   /**
@@ -122,6 +127,11 @@ class Geosuggest extends React.Component {
   onInputBlur = () => {
     if (!this.state.ignoreBlur) {
       this.hideSuggests();
+    }
+
+    // clear ghosted input
+    if (this.state.userInput !== '') {
+      this.setState({ghostedInput: ''});
     }
   }
 
@@ -290,7 +300,8 @@ class Geosuggest extends React.Component {
     this.timer = setTimeout(() => {
       this.setState({
         isSuggestsHidden: true,
-        activeSuggest: this.state.activeSuggest
+        activeSuggest: this.state.activeSuggest,
+        placeholder: this.state.userInput === '' ? this.props.placeholder : '' // eslint-disable-line max-len
       });
     }, 100);
   }
@@ -326,7 +337,10 @@ class Geosuggest extends React.Component {
 
     this.props.onActivateSuggest(newActiveSuggest);
 
-    this.setState({activeSuggest: newActiveSuggest});
+    this.setState({
+      activeSuggest: newActiveSuggest,
+      ghostedInput: newActiveSuggest.label
+    });
 
     if (newActiveSuggest.label !== '') {
       this.setState({placeholder: ''});
@@ -414,8 +428,8 @@ class Geosuggest extends React.Component {
         onEscape={this.hideSuggests}
         ghostedInput={this.props.ghostedInput} />,
       ghostedInput = <GhostedInput className={this.props.inputClassName}
-        activeSuggest={this.state.activeSuggest}
-        userInput={this.state.userInput} />,
+        userInput={this.state.userInput}
+        value={this.state.ghostedInput} />,
       suggestionsList = <SuggestList isHidden={this.state.isSuggestsHidden}
         style={this.props.style.suggests}
         suggestItemStyle={this.props.style.suggestItem}
