@@ -32,7 +32,8 @@ class Geosuggest extends React.Component {
       isLoading: false,
       userInput: props.initialValue,
       activeSuggest: props.activeSuggest,
-      suggests: []
+      suggests: [],
+      placeholder: props.placeholder
     };
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -326,6 +327,12 @@ class Geosuggest extends React.Component {
     this.props.onActivateSuggest(newActiveSuggest);
 
     this.setState({activeSuggest: newActiveSuggest});
+
+    if (newActiveSuggest.label !== '') {
+      this.setState({placeholder: ''});
+    } else {
+      this.setState({placeholder: this.props.placeholder});
+    }
   }
 
   /**
@@ -390,8 +397,10 @@ class Geosuggest extends React.Component {
       ),
       shouldRenderLabel = this.props.label && attributes.id,
       input = <Input className={this.props.inputClassName}
+        {...attributes}
         ref='input'
         value={this.state.userInput}
+        placeholder={this.state.placeholder}
         ignoreEnter={!this.state.isSuggestsHidden}
         ignoreTab={this.props.ignoreTab}
         style={this.props.style.input}
@@ -403,8 +412,7 @@ class Geosuggest extends React.Component {
         onPrev={this.onPrev}
         onSelect={this.onSelect}
         onEscape={this.hideSuggests}
-        ghostedInput={this.props.ghostedInput}
-        {...attributes} />,
+        ghostedInput={this.props.ghostedInput} />,
       ghostedInput = <GhostedInput className={this.props.inputClassName}
         activeSuggest={this.state.activeSuggest}
         userInput={this.state.userInput} />,

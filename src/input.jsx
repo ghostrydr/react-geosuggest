@@ -121,6 +121,7 @@ class Input extends React.Component {
       onChange={this.onChange}
       onKeyPress={this.onKeyPress}
       onFocus={this.onFocus}
+      placeholder={this.props.placeholder}
       onBlur={this.onBlur} />;
   }
 }
