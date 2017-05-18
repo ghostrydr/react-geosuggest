@@ -176,6 +176,7 @@ var Geosuggest = function (_React$Component) {
 
     _this.onInputChange = _this.onInputChange.bind(_this);
     _this.onAfterInputChange = _this.onAfterInputChange.bind(_this);
+    _this.onTab = _this.onTab.bind(_this);
     _this.activateSuggestDefault = { label: '' };
 
     if (props.queryDelay) {
