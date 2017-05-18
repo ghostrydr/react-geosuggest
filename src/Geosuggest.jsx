@@ -122,6 +122,13 @@ class Geosuggest extends React.Component {
   }
 
   /**
+   * When the user hits tab
+   */
+  onTab = () => {
+    this.props.onTab();
+  }
+
+  /**
    * When the input gets blurred
    */
   onInputBlur = () => {
@@ -426,6 +433,7 @@ class Geosuggest extends React.Component {
         onPrev={this.onPrev}
         onSelect={this.onSelect}
         onEscape={this.hideSuggests}
+        onTab={this.onTab}
         ghostedInput={this.props.ghostedInput} />,
       ghostedInput = <GhostedInput className={this.props.inputClassName}
         userInput={this.state.userInput}

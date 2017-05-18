@@ -27,9 +27,17 @@ var App = React.createClass({ // eslint-disable-line
           onSuggestNoResults={this.onSuggestNoResults}
           location={new google.maps.LatLng(53.558572, 9.9278215)}
           radius="20"
+          onTab={this.onTab}
           ghostedInput={true} />
       </div>
     );
+  },
+
+  /**
+   * When the user hits tab
+   */
+  onTab: function() {
+    console.log('onTab'); // eslint-disable-line
   },
 
   /**
