@@ -71,8 +71,8 @@ class Input extends React.Component {
         this.props.onSelect();
         break;
       case 9: // TAB
+        this.props.onTab();
         if (!this.props.ignoreTab) {
-          this.props.onTab();
           this.props.onSelect();
         }
         break;
