@@ -83,7 +83,7 @@ var Input = function (_React$Component) {
           break;
         case 9:
           // TAB
-          _this.props.onTab(_this.props);
+          _this.props.onTab(event);
           if (!_this.props.ignoreTab) {
             _this.props.onSelect();
           }
